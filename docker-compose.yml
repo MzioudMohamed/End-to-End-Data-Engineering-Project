@@ -1,0 +1,28 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: legacy-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      # échoue immédiatement avec un message clair si .env est absent
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Définis MSSQL_SA_PASSWORD dans le fichier .env}
+      # garde de la RAM pour Docker/WSL2 et le reste de la machine
+      MSSQL_MEMORY_LIMIT_MB: 3072
+    ports:
+      - "1434:1433"
+    volumes:
+      # les données survivent à "docker compose down" (pas à "down -v")
+      - sqlserver_data:/var/opt/mssql
+      # dossier où déposer le .bak AdventureWorks avant restauration
+      - ./legacy/backup:/backup
+    healthcheck:
+      # "healthy" = SQL Server accepte les connexions ; servira aux services qui en dépendront
+      test: /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -Q "SELECT 1" -b -o /dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+volumes:
+  sqlserver_data:

@@ -1,0 +1,24 @@
+# Secrets et configuration locale
+.env
+
+# Backups de bases de données (volumineux, téléchargés depuis Microsoft)
+*.bak
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Spark / Delta en local
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Terraform (le state peut contenir des secrets)
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Éditeur
+.vscode/
+.ipynb_checkpoints/
