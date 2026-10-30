@@ -1,0 +1,7 @@
+# Copier ce fichier en "terraform.tfvars", puis renseigner les valeurs locales.
+# Le fichier terraform.tfvars est ignore par Git et ne doit jamais être commité.
+subscription_id = "00000000-0000-0000-0000-000000000000"
+location        = "francecentral"
+project         = "retailmod"
+env             = "dev"
+suffix          = "abc123"

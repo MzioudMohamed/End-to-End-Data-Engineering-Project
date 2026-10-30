@@ -18,6 +18,7 @@ derby.log
 .terraform/
 *.tfstate
 *.tfstate.*
+*.tfvars
 
 # Éditeur
 .vscode/
