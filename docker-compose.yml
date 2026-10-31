@@ -12,7 +12,6 @@ services:
     ports:
       - "1434:1433"
     volumes:
-      # les données survivent à "docker compose down" (pas à "down -v")
       - sqlserver_data:/var/opt/mssql
       # dossier où déposer le .bak AdventureWorks avant restauration
       - ./legacy/backup:/backup

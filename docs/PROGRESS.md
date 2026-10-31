@@ -127,3 +127,66 @@ Ensuite : **step 2.4** (Key Vault + ADF + RBAC ; enregistrer `Microsoft.KeyVault
 ### Prochaine action
 
 Step 2.4 : préparer Key Vault, ADF avec identité managée et RBAC.
+
+### Résultat du step 2.4
+
+- `Microsoft.KeyVault` et `Microsoft.DataFactory` vérifiés et enregistrés.
+- Key Vault créé avec l'autorisation RBAC.
+- Data Factory créée avec une identité managée `SystemAssigned`.
+- Rôle `Storage Blob Data Contributor` attribué à ADF sur le Storage Account.
+- Rôle `Key Vault Secrets User` attribué à ADF sur le Key Vault.
+- `terraform validate` réussi.
+- `terraform apply` réussi : 4 ressources ajoutées, 0 modification, 0 destruction.
+- Second `terraform plan` : `No changes`.
+- Quiz T2.4 : 4/5.
+
+### Prochaine action
+
+Step 2.5 : créer le login SQL `adf_reader` en lecture seule et préparer son secret dans Key Vault.
+
+### Résultat du step 2.5
+
+- Script `legacy/create_adf_reader.sql` créé pour un login SQL dédié à ADF.
+- Login `adf_reader` créé au niveau SQL Server.
+- Utilisateur `adf_reader` créé dans `LegacyRetail`.
+- Accès limité au rôle `db_datareader`.
+- Secret `sql-adf-reader-password` créé dans Key Vault.
+- Rôle `Key Vault Secrets Officer` attribué à l’identité Azure courante pour gérer le secret.
+- `terraform plan` final : `No changes`.
+- Quiz T2.5 : 5/5.
+
+### Prochaine action
+
+Step 2.6 : préparer le Self-hosted Integration Runtime (SHIR) pour la connexion ADF vers SQL Server local.
+
+### Résultat du step 2.6
+
+- Ressource SHIR `shir-retailmod-dev` créée avec Terraform.
+- `terraform apply` réussi : 1 ressource ajoutée, 0 modification, 0 destruction.
+- Second `terraform plan` : `No changes`.
+- Extension Azure CLI `datafactory` vérifiée.
+- Clé d'authentification récupérée sans être enregistrée ni partagée.
+- Nœud SHIR installé et inscrit sur l'hôte Windows.
+- Statut Azure Data Factory : `Running`.
+- Quiz T2.6 : à compléter.
+
+### Prochaine action
+
+Step 2.7 : créer les linked services, les datasets et le premier pipeline ADF en full load vers ADLS Gen2.
+
+### Résultat du step 2.7
+
+- Linked Service Key Vault créé, testé et publié.
+- Linked Service SQL Server créé, testé et publié via le SHIR.
+- Linked Service ADLS Gen2 créé, testé et publié avec l'identité managée ADF.
+- Dataset SQL `ds_sql_salesorderheader` créé.
+- Dataset Parquet `ds_adls_salesorderheader_parquet` créé vers `landing/salesorderheader/full/salesorderheader.parquet`.
+- Pipeline `pl_full_salesorderheader` créé et publié.
+- Debug réussi : 28 470 lignes lues et 28 470 lignes copiées.
+- Le volume reflète l'état courant de LegacyRetail, avancé de trois jours par rapport à J0.
+- Quiz T2.7 : à compléter.
+
+### Prochaine action
+
+Step 2.8 : concevoir le pipeline générique piloté par métadonnées avec extraction incrémentale.
+Réponses au quiz T2.7
