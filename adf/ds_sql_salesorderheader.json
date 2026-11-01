@@ -1,0 +1,72 @@
+﻿{
+  "etag": "a406432a-0000-0e00-0000-6ae54d280000",
+  "id": "/subscriptions/b9f829da-f7c3-429e-a5e8-d3e793158c63/resourceGroups/rg-retailmod-dev/providers/Microsoft.DataFactory/factories/adf-retailmod-dev-mm10/datasets/ds_sql_salesorderheader",
+  "name": "ds_sql_salesorderheader",
+  "properties": {
+    "additionalProperties": null,
+    "annotations": [],
+    "description": null,
+    "folder": null,
+    "linkedServiceName": {
+      "parameters": null,
+      "referenceName": "ls_sql_legacy_retail",
+      "type": "LinkedServiceReference"
+    },
+    "parameters": null,
+    "schema": [
+      {
+        "name": "SalesOrderID",
+        "precision": 10,
+        "type": "int"
+      },
+      {
+        "name": "OrderDate",
+        "type": "date"
+      },
+      {
+        "name": "CustomerID",
+        "precision": 10,
+        "type": "int"
+      },
+      {
+        "name": "TerritoryID",
+        "precision": 10,
+        "type": "int"
+      },
+      {
+        "name": "OnlineOrderFlag",
+        "type": "bit"
+      },
+      {
+        "name": "SubTotal",
+        "precision": 19,
+        "scale": 4,
+        "type": "decimal"
+      },
+      {
+        "name": "TaxAmt",
+        "precision": 19,
+        "scale": 4,
+        "type": "decimal"
+      },
+      {
+        "name": "Freight",
+        "precision": 19,
+        "scale": 4,
+        "type": "decimal"
+      },
+      {
+        "name": "ModifiedDate",
+        "scale": 0,
+        "type": "datetime2"
+      }
+    ],
+    "schemaTypePropertiesSchema": "dbo",
+    "structure": null,
+    "table": "SalesOrderHeader",
+    "tableName": null,
+    "type": "SqlServerTable"
+  },
+  "resourceGroup": "rg-retailmod-dev",
+  "type": "Microsoft.DataFactory/factories/datasets"
+}

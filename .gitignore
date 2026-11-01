@@ -25,3 +25,5 @@ derby.log
 .ipynb_checkpoints/
 
 data/
+
+.venv-bronze/
