@@ -312,3 +312,22 @@ Commencer T4 : Silver locale, nettoyage, contrôles de qualité et préparation 
 ### Prochaine action
 
 Commencer T5 : modèle Gold en étoile et réconciliation avec le legacy.
+
+## T5 — Gold locale
+
+### Jalon T5.4
+
+- Modèle en étoile Delta créé localement.
+- `dim_customer` créée avec 17 452 versions SCD2.
+- `dim_date` créée avec 1 067 dates.
+- `dim_territory` créée avec 10 territoires.
+- `fact_sales` créée avec 28 342 commandes.
+- Jointure temporelle avec Customer SCD2 validée.
+- Aucun fait sans `customer_sk`.
+- Aucun `SalesOrderID` dupliqué.
+- Aucun fait sans `date_key`.
+- Contrôles Gold réussis.
+
+### Prochaine action
+
+T5.5 : réconcilier les volumes et montants Gold avec `LegacyRetail`.
