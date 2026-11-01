@@ -23,3 +23,5 @@ derby.log
 # Éditeur
 .vscode/
 .ipynb_checkpoints/
+
+data/

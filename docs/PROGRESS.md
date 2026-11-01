@@ -190,3 +190,96 @@ Step 2.7 : créer les linked services, les datasets et le premier pipeline ADF e
 
 Step 2.8 : concevoir le pipeline générique piloté par métadonnées avec extraction incrémentale.
 Réponses au quiz T2.7
+
+### Résultat du step 2.8
+
+- Stratégie retenue : fenêtre quotidienne basée sur `load_date`.
+- Table `dbo.EtlTableConfig` créée pour piloter les extractions.
+- Dataset `ds_sql_etl_table_config` créé.
+- Pipeline `pl_incremental_generic` créé avec `Lookup → ForEach → Copy`.
+- Dataset Parquet dynamique créé avec partition `load_date=AAAA-MM-JJ`.
+- Extraction du 2014-05-01 réussie : 227 lignes lues et copiées.
+- Relance du 2014-05-01 réussie : même volume, sans doublon apparent.
+- Extraction vide du 2014-05-04 avant avancement de la source : 0 ligne, pipeline réussi.
+- Source avancée au 2014-05-04 avec `dbo.usp_advance_one_day`.
+- Extraction du 2014-05-04 réussie : 57 lignes lues et copiées.
+- Quiz T2.8 : 5/5.
+
+### Prochaine action
+
+Step 2.9 : tester les artefacts ADF, vérifier les partitions et exporter les JSON ADF vers `adf/`.
+
+### Résultat du step 2.9
+
+- Dossier `adf/` créé pour versionner les artefacts ADF.
+- Cinq objets ADF exportés en JSON :
+  - `pl_full_salesorderheader`
+  - `pl_incremental_generic`
+  - `ds_sql_salesorderheader`
+  - `ds_sql_etl_table_config`
+  - `ds_adls_incremental_parquet`
+- Les cinq fichiers JSON sont syntaxiquement valides.
+- Aucun secret détecté dans les exports.
+- Extraction vide testée avec succès : 0 ligne copiée.
+- Relance du 2014-05-01 testée avec succès : 227 lignes copiées.
+- Extraction du 2014-05-04 testée avec succès : 57 lignes copiées.
+- Quiz T2.9 : 5/5.
+
+
+## T3 — Bronze local
+
+### Résultat de T3.1 à T3.5
+
+- Source Bronze retenue : fichiers Parquet de la landing ADLS, sans lecture JDBC directe.
+- Parquet full load téléchargé localement depuis ADLS Gen2.
+- Environnement `.venv-bronze` créé avec Python 3.11.9.
+- PySpark `3.5.5` et Delta Lake `3.2.0` installés et vérifiés.
+- Source `LegacyRetail` remise à J0 : `2014-04-30`.
+- Compte `adf_reader` recréé dans `LegacyRetail` avec le rôle `db_datareader`.
+- Parquet full load recréé à J0 : 28 115 lignes.
+- Script `bronze/bronze_salesorderheader.py` créé pour écrire une table Delta locale.
+- Colonnes d'audit ajoutées : `load_date`, `source_system`, `ingestion_timestamp`.
+- Partition `2014-04-30` chargée : 28 115 lignes.
+- Partition `2014-05-01` chargée : 227 lignes.
+- Table Delta vérifiée : 28 342 lignes au total.
+- Rejouabilité vérifiée sur J0 et le 2014-05-01, sans doublon.
+- Dossier `_delta_log` présent.
+- Quiz T3 : 5/5.
+
+### Décisions et limites
+
+- Bronze est d'abord exécutée localement, avant son portage dans Fabric.
+- Le script traite actuellement `SalesOrderHeader` uniquement.
+- Le chemin `data/` reste local et ignoré par Git.
+- Les avertissements Spark liés au plan ou au nettoyage des répertoires temporaires Windows ne bloquent pas le résultat.
+
+### Prochaine action
+
+T3.6 : ajouter une vérification simple de qualité des données Bronze avant de clôturer T3.
+
+### Résultat du step T3.6
+
+- Script `bronze/check_bronze_salesorderheader.py` créé.
+- Contrôle du volume : 28 342 lignes.
+- Contrôle des `SalesOrderID` nuls : 0.
+- Contrôle des groupes dupliqués : 0.
+- Contrôle des colonnes d'audit : aucune colonne manquante.
+- Contrôles Bronze réussis.
+- Quiz final T3 : 5/5.
+
+### Résultat de la tâche T3
+
+- Bronze locale construite à partir des fichiers Parquet de la landing ADLS.
+- Environnement Python isolé avec Python 3.11.9, PySpark 3.5.5 et Delta Lake 3.2.0.
+- Table Delta `data/bronze/salesorderheader` créée avec les colonnes d'audit `load_date`, `source_system` et `ingestion_timestamp`.
+- Chargement initial J0 : 28 115 lignes dans la partition `2014-04-30`.
+- Chargement incrémental : 227 lignes dans la partition `2014-05-01`.
+- Total Bronze : 28 342 lignes.
+- Rejouabilité vérifiée sur les deux partitions, sans doublon.
+- Dossier `_delta_log` présent.
+- Contrôles de qualité réussis.
+- Les données locales du dossier `data/` restent ignorées par Git.
+
+### Prochaine action
+
+Commencer T4 : Silver locale, nettoyage, contrôles de qualité et préparation du SCD2.

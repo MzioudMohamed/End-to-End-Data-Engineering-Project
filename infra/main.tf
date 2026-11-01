@@ -81,3 +81,9 @@ resource "azurerm_data_factory_integration_runtime_self_hosted" "main" {
   name            = "shir-${var.project}-${var.env}"
   data_factory_id = azurerm_data_factory.main.id
 }
+
+resource "azurerm_role_assignment" "current_user_storage_reader" {
+  scope                = azurerm_storage_account.lake.id
+  role_definition_name = "Storage Blob Data Reader"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
