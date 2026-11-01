@@ -9,7 +9,7 @@ BEGIN
             CONSTRAINT PK_EtlTableConfig PRIMARY KEY,
         SourceSchema      sysname NOT NULL,
         SourceTable       sysname NOT NULL,
-        LoadType          varchar(10) NOT NULL,
+        LoadType          varchar(20) NOT NULL,
         WatermarkColumn   sysname NULL,
         IsActive           bit NOT NULL
             CONSTRAINT DF_EtlTableConfig_IsActive DEFAULT (1),

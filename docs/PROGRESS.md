@@ -283,3 +283,32 @@ T3.6 : ajouter une vérification simple de qualité des données Bronze avant de
 ### Prochaine action
 
 Commencer T4 : Silver locale, nettoyage, contrôles de qualité et préparation du SCD2.
+
+## T4 — Silver locale et SCD2
+
+### Résultats
+
+- Silver `SalesOrderHeader` créée à partir de Bronze.
+- 28 342 lignes nettoyées et typées.
+- Contrôles Silver réussis : clés non nulles, aucun doublon, montants valides.
+- Snapshots Customer J0 et 2014-05-01 extraits via ADF.
+- Dimension Customer SCD2 créée dans `data/silver/customer`.
+- 17 406 clients J0 traités.
+- 46 lignes de changement traitées.
+- 15 anciennes versions clôturées.
+- 46 nouvelles versions créées au 2014-05-01.
+- Total SCD2 : 17 452 lignes.
+- Aucune version courante multiple.
+- Périodes invalides : 0.
+- Quiz T4 : 4/5.
+
+### Décisions et limites
+
+- Silver est exécutée localement avec PySpark et Delta Lake.
+- `Customer` est la première dimension historisée en SCD2.
+- Le script SCD2 traite actuellement J0 et une seule journée de changement.
+- Le portage Fabric est prévu en phase P3.
+
+### Prochaine action
+
+Commencer T5 : modèle Gold en étoile et réconciliation avec le legacy.
