@@ -18,7 +18,12 @@ derby.log
 .terraform/
 *.tfstate
 *.tfstate.*
+*.tfvars
 
 # Éditeur
 .vscode/
 .ipynb_checkpoints/
+
+data/
+
+.venv-bronze/
