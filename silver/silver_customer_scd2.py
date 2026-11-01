@@ -35,7 +35,7 @@ try:
             col("CustomerType").alias("customer_type"),
             col("TerritoryID").cast("long").alias("territory_id"),
         )
-        .withColumn("valid_from", lit("2014-04-30").cast(DateType()))
+        .withColumn("valid_from", lit("2011-05-31").cast(DateType()))
         .withColumn("valid_to", lit("9999-12-31").cast(DateType()))
         .withColumn("is_current", lit(True))
     )
