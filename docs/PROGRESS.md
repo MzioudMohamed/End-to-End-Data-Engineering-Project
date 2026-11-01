@@ -331,3 +331,17 @@ Commencer T5 : modèle Gold en étoile et réconciliation avec le legacy.
 ### Prochaine action
 
 T5.5 : réconcilier les volumes et montants Gold avec `LegacyRetail`.
+
+### T5.5 — Réconciliation Gold / Legacy
+
+- Réconciliation effectuée entre `fact_sales` et `LegacyRetail`.
+- Résultats identiques :
+  - Commandes : 28 342
+  - SubTotal : 107890830.3639
+  - TaxAmt : 10030530.3770
+  - Freight : 3134541.4001
+- Le modèle Gold conserve donc les volumes et mesures du système legacy.
+- T5 terminé.
+- Trial Fabric toujours non démarré, conformément au planning.
+
+Quiz T5 : 5/5.
