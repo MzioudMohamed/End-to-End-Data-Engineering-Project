@@ -1,12 +1,50 @@
+import argparse
+from datetime import datetime
+from pathlib import Path
+
 from delta import configure_spark_with_delta_pip
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, lit, when
+from pyspark.sql.functions import col, date_sub, lit
 from pyspark.sql.types import DateType
 
 
+parser = argparse.ArgumentParser(
+    description="Applique les changements Customer au SCD2 existant."
+)
+parser.add_argument("--changes-path", required=True)
+parser.add_argument("--change-date", required=True)
+parser.add_argument(
+    "--output-path",
+    default="data/silver/customer",
+)
+
+args = parser.parse_args()
+
+try:
+    datetime.strptime(args.change_date, "%Y-%m-%d")
+except ValueError as error:
+    raise ValueError(
+        "La date doit respecter le format AAAA-MM-JJ."
+    ) from error
+
+changes_path = Path(args.changes_path)
+
+if not changes_path.is_file():
+    raise FileNotFoundError(
+        f"Fichier de changements introuvable : {changes_path}"
+    )
+
+output_path = Path(args.output_path)
+
+if not output_path.exists():
+    raise FileNotFoundError(
+        "La table SCD2 existante est introuvable. "
+        "Le chargement initial doit être réalisé avant le mode quotidien."
+    )
+
 spark_builder = (
     SparkSession.builder
-    .appName("silver_customer_scd2")
+    .appName("silver_customer_scd2_daily")
     .config(
         "spark.sql.extensions",
         "io.delta.sql.DeltaSparkSessionExtension",
@@ -19,26 +57,24 @@ spark_builder = (
 
 spark = configure_spark_with_delta_pip(spark_builder).getOrCreate()
 
-j0_path = "data/landing/customer/customer_j0.parquet"
-changes_path = "data/landing/customer/customer_2014-05-01.parquet"
-output_path = "data/silver/customer"
-
 try:
-    j0 = spark.read.parquet(j0_path)
-    changes = spark.read.parquet(changes_path)
+    existing = spark.read.format("delta").load(str(output_path))
+    changes = spark.read.parquet(str(changes_path))
 
-    j0 = (
-        j0
-        .select(
-            col("CustomerID").cast("long").alias("customer_id"),
-            col("CustomerName").alias("customer_name"),
-            col("CustomerType").alias("customer_type"),
-            col("TerritoryID").cast("long").alias("territory_id"),
+    required_columns = {
+        "CustomerID",
+        "CustomerName",
+        "CustomerType",
+        "TerritoryID",
+    }
+
+    missing_columns = required_columns.difference(changes.columns)
+
+    if missing_columns:
+        raise ValueError(
+            f"Colonnes manquantes dans les changements : "
+            f"{sorted(missing_columns)}"
         )
-        .withColumn("valid_from", lit("2011-05-31").cast(DateType()))
-        .withColumn("valid_to", lit("9999-12-31").cast(DateType()))
-        .withColumn("is_current", lit(True))
-    )
 
     changes = (
         changes
@@ -48,87 +84,97 @@ try:
             col("CustomerType").alias("customer_type"),
             col("TerritoryID").cast("long").alias("territory_id"),
         )
-        .withColumn("change_date", lit("2014-05-01").cast(DateType()))
+        .withColumn(
+            "change_date",
+            lit(args.change_date).cast(DateType()),
+        )
     )
+
+    current = existing.filter(col("is_current"))
 
     comparison = (
-        j0.alias("old")
-        .join(changes.alias("new"), "customer_id", "full")
-    )
-
-    unchanged = (
-        comparison
-        .filter(
-            col("new.customer_id").isNull()
-            | (
-                (col("old.customer_name") == col("new.customer_name"))
-                & (col("old.customer_type") == col("new.customer_type"))
-                & (col("old.territory_id") == col("new.territory_id"))
-            )
-        )
-        .select(
-            col("old.customer_id").alias("customer_id"),
-            col("old.customer_name").alias("customer_name"),
-            col("old.customer_type").alias("customer_type"),
-            col("old.territory_id").alias("territory_id"),
-            col("old.valid_from").alias("valid_from"),
-            col("old.valid_to").alias("valid_to"),
-            col("old.is_current").alias("is_current"),
+        current.alias("old")
+        .join(
+            changes.alias("new"),
+            col("old.customer_id") == col("new.customer_id"),
+            "full",
         )
     )
 
-    closed_versions = (
-        comparison
-        .filter(
-            col("old.customer_id").isNotNull()
-            & col("new.customer_id").isNotNull()
-            & (
-                (col("old.customer_name") != col("new.customer_name"))
-                | (col("old.customer_type") != col("new.customer_type"))
-                | (col("old.territory_id") != col("new.territory_id"))
-            )
-        )
-        .select(
-            col("old.customer_id").alias("customer_id"),
-            col("old.customer_name").alias("customer_name"),
-            col("old.customer_type").alias("customer_type"),
-            col("old.territory_id").alias("territory_id"),
-            col("old.valid_from").alias("valid_from"),
-            (col("new.change_date") - 1).alias("valid_to"),
-            lit(False).alias("is_current"),
+    different_values = ~(
+        col("old.customer_name").eqNullSafe(col("new.customer_name"))
+        & col("old.customer_type").eqNullSafe(col("new.customer_type"))
+        & col("old.territory_id").eqNullSafe(col("new.territory_id"))
+    )
+
+    changed_or_new = comparison.filter(
+        col("new.customer_id").isNotNull()
+        & (
+            col("old.customer_id").isNull()
+            | different_values
         )
     )
 
-    new_versions = (
-        changes
-        .select(
-            col("customer_id"),
-            col("customer_name"),
-            col("customer_type"),
-            col("territory_id"),
-            col("change_date").alias("valid_from"),
-            lit("9999-12-31").cast(DateType()).alias("valid_to"),
-            lit(True).alias("is_current"),
-        )
+    changed_existing = changed_or_new.filter(
+        col("old.customer_id").isNotNull()
     )
 
-    silver_customer = (
-        unchanged
+    changed_ids = changed_or_new.select(
+        col("new.customer_id").alias("customer_id")
+    ).distinct()
+
+    historical = existing.filter(~col("is_current"))
+
+    unchanged_current = (
+        current
+        .join(changed_ids, "customer_id", "left_anti")
+    )
+
+    unchanged_versions = historical.unionByName(unchanged_current)
+
+    closed_versions = changed_existing.select(
+        col("old.customer_id").alias("customer_id"),
+        col("old.customer_name").alias("customer_name"),
+        col("old.customer_type").alias("customer_type"),
+        col("old.territory_id").alias("territory_id"),
+        col("old.valid_from").alias("valid_from"),
+        date_sub(
+            col("new.change_date"),
+            1,
+        ).alias("valid_to"),
+        lit(False).alias("is_current"),
+        col("old.source_system").alias("source_system"),
+    )
+
+    new_versions = changed_or_new.select(
+        col("new.customer_id").alias("customer_id"),
+        col("new.customer_name").alias("customer_name"),
+        col("new.customer_type").alias("customer_type"),
+        col("new.territory_id").alias("territory_id"),
+        col("new.change_date").alias("valid_from"),
+        lit("9999-12-31").cast(DateType()).alias("valid_to"),
+        lit(True).alias("is_current"),
+        lit("adls_landing").alias("source_system"),
+    )
+
+    result = (
+        unchanged_versions
         .unionByName(closed_versions)
         .unionByName(new_versions)
-        .withColumn("source_system", lit("adls_landing"))
     )
 
     (
-        silver_customer.write
+        result.write
         .format("delta")
         .mode("overwrite")
-        .save(output_path)
+        .save(str(output_path))
     )
 
-    print(f"Clients J0 : {j0.count()}")
-    print(f"Lignes de changement : {changes.count()}")
-    print(f"Lignes Silver SCD2 : {silver_customer.count()}")
+    print(f"Clients existants : {current.count()}")
+    print(f"Changements reçus : {changes.count()}")
+    print(f"Nouvelles versions : {new_versions.count()}")
+    print(f"Lignes SCD2 finales : {result.count()}")
+    print(f"Date appliquée : {args.change_date}")
     print(f"Destination : {output_path}")
 
 finally:

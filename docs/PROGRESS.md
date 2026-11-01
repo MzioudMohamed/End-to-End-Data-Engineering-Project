@@ -345,3 +345,17 @@ T5.5 : réconcilier les volumes et montants Gold avec `LegacyRetail`.
 - Trial Fabric toujours non démarré, conformément au planning.
 
 Quiz T5 : 5/5.
+
+## T6 — Orchestration
+
+- SCD2 Customer rendu paramétrable par fichier et date.
+- Pipeline ADF étendu à `SalesOrderHeader` et `Customer`.
+- Extraction du 2014-05-02 validée.
+- Orchestrateur PowerShell créé : Bronze → Silver → SCD2 → Gold.
+- Reprise du 2014-05-02 réussie sans doublons.
+- Arrêt sur fichier manquant vérifié.
+- Contrôles Silver et Gold réussis.
+- T6 terminé.
+- L’extraction ADF reste manuelle jusqu’au portage Fabric Pipeline en P3.
+
+Quiz T6 : 5/5.
