@@ -8,7 +8,7 @@ IF NOT EXISTS (
 )
 BEGIN
     CREATE LOGIN [adf_reader]
-    WITH PASSWORD = N'legacy_pwd_2026@',
+    WITH PASSWORD = N'STRONG_PASSWORD_HERE',
          CHECK_POLICY = ON,
          CHECK_EXPIRATION = ON;
 END;

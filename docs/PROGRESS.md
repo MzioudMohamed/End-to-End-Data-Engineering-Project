@@ -359,3 +359,18 @@ Quiz T5 : 5/5.
 - L’extraction ADF reste manuelle jusqu’au portage Fabric Pipeline en P3.
 
 Quiz T6 : 5/5.
+
+## T7 — Qualité et sécurité
+
+- `pytest` installé dans `.venv-bronze`.
+- Tests SCD2 : 4 réussis.
+- Tests Gold : 4 réussis.
+- Test d’orchestration en cas de fichier manquant : 1 réussi.
+- Tests Bronze/Silver : 6 réussis.
+- Total : 15 tests réussis.
+- Secrets retirés des fichiers versionnés.
+- `.env` et `terraform.tfvars` restent ignorés.
+- Exports ADF sans secrets détectés.
+- T7 terminé.
+
+Quiz T7 : à préparer.
