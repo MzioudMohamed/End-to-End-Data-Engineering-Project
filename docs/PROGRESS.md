@@ -374,3 +374,29 @@ Quiz T6 : 5/5.
 - T7 terminé.
 
 Quiz T7 : à préparer.
+
+## P3 — Portage Microsoft Fabric
+
+- Trial Fabric activé en région France Central.
+- Workspace `retailmod-dev` et Lakehouse créés.
+- Shortcut OneLake `landing` configuré vers ADLS Gen2.
+- Bronze Fabric : 28 402 lignes, contrôles réussis.
+- Silver Fabric : 28 402 lignes, contrôles réussis.
+- SCD2 Customer Fabric : 17 501 lignes, 17 471 versions courantes.
+- Gold Fabric : 28 402 faits, contrôles réussis.
+- Réconciliation Fabric/local réussie par partition et par mesure.
+- Fabric Pipeline créé : Bronze → Silver → SCD2 → Gold.
+- Paramètre `load_date` transmis à Bronze et SCD2.
+- Exécution du pipeline Fabric réussie.
+- Modèle sémantique Direct Lake et relations créés.
+- Rapport Power BI reporté à T10.
+- P3 en cours : intégration ADF → Fabric et déclenchement quotidien.
+
+### Limite d'intégration ADF → Fabric
+
+- L'appel automatique ADF → Fabric n'a pas été activé.
+- L'activité ADF native Fabric n'est pas disponible dans l'interface utilisée.
+- L'appel REST nécessite l'autorisation des service principals au niveau du tenant Fabric.
+- Cette autorisation n'est pas accessible avec le compte actuel.
+- Chaîne validée : ADF manuel → ADLS Gen2 → Fabric Pipeline paramétré.
+- Le paramètre `load_date` fonctionne dans le pipeline Fabric.
