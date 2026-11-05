@@ -400,3 +400,33 @@ Quiz T7 : à préparer.
 - Cette autorisation n'est pas accessible avec le compte actuel.
 - Chaîne validée : ADF manuel → ADLS Gen2 → Fabric Pipeline paramétré.
 - Le paramètre `load_date` fonctionne dans le pipeline Fabric.
+
+## T8.4 — Versionnement Fabric
+
+- Intégration Git native Fabric vérifiée.
+- GitHub disponible mais désactivé par un réglage tenant inaccessible.
+- Notebooks Fabric exportés manuellement au format `.ipynb`.
+- Outputs d’exécution supprimés avant export.
+- Cellule destructive `DROP TABLE` retirée du notebook Bronze quotidien.
+- Artefacts Fabric versionnés dans le dépôt.
+- Déploiement Fabric automatique reporté/documenté comme limitation tenant.
+- T8.4 terminé.
+
+## T8.5 — Environnements dev/prod
+
+- Workspace `retailmod-prod` créé sur la capacité Fabric Trial existante.
+- Lakehouse production créé.
+- Shortcut ADLS configuré avec l'identité du workspace prod.
+- Notebooks et pipeline Fabric déployés manuellement en prod.
+- Pipeline prod exécuté et validé sur les trois dates historiques.
+- Séparation dev/prod terminée.
+- T8.5 terminé.
+
+## T9 — Monitoring et observabilité
+
+- Workspace Log Analytics `log-retailmod-dev` créé avec une rétention de 7 jours.
+- Diagnostic setting ADF configuré vers Log Analytics.
+- Tables `ADFPipelineRun` et `ADFActivityRun` vérifiées.
+- Exécutions ADF `Succeeded`, `Queued` et `InProgress` observées.
+- Alerte `alert-adf-pipeline-failure` créée sur les échecs de pipeline.
+- T9 terminé.

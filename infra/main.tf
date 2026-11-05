@@ -14,6 +14,15 @@ resource "azurerm_resource_group" "main" {
   tags     = local.tags
 }
 
+resource "azurerm_log_analytics_workspace" "main" {
+  name                = "log-${var.project}-${var.env}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+  tags                = local.tags
+}
+
 # Data lake : un storage account avec namespace hiérarchique (HNS) = ADLS Gen2.
 # LRS : réplication la moins chère, suffisante pour un projet éducatif.
 resource "azurerm_storage_account" "lake" {
