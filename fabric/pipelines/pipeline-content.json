@@ -1,0 +1,109 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "name": "Bronze SalesOrderHeader",
+        "type": "TridentNotebook",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookId": "2097cc57-61d2-41cb-8e0d-cea24f87bbf4",
+          "workspaceId": "e448b0b4-f98b-40d4-83d3-d06f24df8693",
+          "parameters": {
+            "load_date": {
+              "value": "@pipeline().parameters.load_date",
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "name": "Silver SalesOrderHeader",
+        "type": "TridentNotebook",
+        "dependsOn": [
+          {
+            "activity": "Bronze SalesOrderHeader",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookId": "b74c0b8f-f25d-4b17-ac97-04cf537073d7",
+          "workspaceId": "e448b0b4-f98b-40d4-83d3-d06f24df8693"
+        }
+      },
+      {
+        "name": "Silver Customer SCD2",
+        "type": "TridentNotebook",
+        "dependsOn": [
+          {
+            "activity": "Silver SalesOrderHeader",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookId": "08c43f25-3589-443b-8257-3b62a304fe48",
+          "workspaceId": "e448b0b4-f98b-40d4-83d3-d06f24df8693",
+          "parameters": {
+            "load_date": {
+              "value": "@pipeline().parameters.load_date",
+              "type": "string"
+            }
+          }
+        }
+      },
+      {
+        "name": "Gold Sales",
+        "type": "TridentNotebook",
+        "dependsOn": [
+          {
+            "activity": "Silver Customer SCD2",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookId": "c8436ff9-85cf-454a-b71e-553f4d4ada87",
+          "workspaceId": "e448b0b4-f98b-40d4-83d3-d06f24df8693"
+        }
+      }
+    ],
+    "parameters": {
+      "load_date": {
+        "type": "string",
+        "defaultValue": "2014-05-02"
+      }
+    }
+  }
+}
