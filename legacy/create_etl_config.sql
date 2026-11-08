@@ -1,7 +1,10 @@
 USE [LegacyRetail];
 GO
 
-IF OBJECT_ID(N'dbo.EtlTableConfig', N'U') IS NULL
+IF OBJECT_ID(N'dbo.EtlTableConfig', N'U') IS NOT NULL
+    DROP TABLE dbo.EtlTableConfig;
+GO
+
 BEGIN
     CREATE TABLE dbo.EtlTableConfig
     (
@@ -9,6 +12,7 @@ BEGIN
             CONSTRAINT PK_EtlTableConfig PRIMARY KEY,
         SourceSchema      sysname NOT NULL,
         SourceTable       sysname NOT NULL,
+        ExtractColumns    nvarchar(max) NOT NULL,
         LoadType          varchar(20) NOT NULL,
         WatermarkColumn   sysname NULL,
         IsActive           bit NOT NULL
@@ -25,11 +29,14 @@ MERGE dbo.EtlTableConfig AS target
 USING
 (
     VALUES
-        (N'dbo', N'SalesOrderHeader', 'incremental', N'ModifiedDate', 1)
+        (N'dbo', N'SalesOrderHeader', N'SalesOrderID, OrderDate, CustomerID, TerritoryID, OnlineOrderFlag, SubTotal, TaxAmt, Freight, ModifiedDate','incremental', N'ModifiedDate', 1),
+        (N'dbo', N'Customer', N'CustomerID, CustomerName, CustomerType, TerritoryID, ModifiedDate', 'incremental', N'ModifiedDate', 1),
+        (N'dbo', N'Product', N'ProductID, Name, ProductNumber, Color, StandardCost, ListPrice, ProductSubcategoryID, ModifiedDate', 'incremental', N'ModifiedDate', 1)
 ) AS source
 (
     SourceSchema,
     SourceTable,
+    ExtractColumns,
     LoadType,
     WatermarkColumn,
     IsActive
@@ -46,6 +53,7 @@ WHEN NOT MATCHED THEN
     (
         SourceSchema,
         SourceTable,
+        ExtractColumns,
         LoadType,
         WatermarkColumn,
         IsActive
@@ -54,6 +62,7 @@ WHEN NOT MATCHED THEN
     (
         source.SourceSchema,
         source.SourceTable,
+        source.ExtractColumns,
         source.LoadType,
         source.WatermarkColumn,
         source.IsActive
@@ -64,6 +73,7 @@ SELECT
     ConfigId,
     SourceSchema,
     SourceTable,
+    ExtractColumns,
     LoadType,
     WatermarkColumn,
     IsActive
