@@ -1,0 +1,42 @@
+﻿{
+  "etag": "7c014952-0000-0e00-0000-6aef9da70000",
+  "id": "/subscriptions/b9f829da-f7c3-429e-a5e8-d3e793158c63/resourceGroups/rg-retailmod-dev/providers/Microsoft.DataFactory/factories/adf-retailmod-dev-mm10/datasets/ds_adls_full_parquet",
+  "name": "ds_adls_full_parquet",
+  "properties": {
+    "additionalProperties": null,
+    "annotations": [],
+    "compressionCodec": "snappy",
+    "description": null,
+    "folder": null,
+    "linkedServiceName": {
+      "parameters": null,
+      "referenceName": "ls_adls_landing",
+      "type": "LinkedServiceReference"
+    },
+    "location": {
+      "additionalProperties": null,
+      "fileName": "@{concat(dataset().table_name, '.parquet')}",
+      "fileSystem": "landing",
+      "folderPath": {
+        "type": "Expression",
+        "value": "@{concat('full/',dataset().table_name, '/load_date=', dataset().load_date)}"
+      },
+      "type": "AzureBlobFSLocation"
+    },
+    "parameters": {
+      "load_date": {
+        "defaultValue": null,
+        "type": "string"
+      },
+      "table_name": {
+        "defaultValue": null,
+        "type": "string"
+      }
+    },
+    "schema": [],
+    "structure": null,
+    "type": "Parquet"
+  },
+  "resourceGroup": "rg-retailmod-dev",
+  "type": "Microsoft.DataFactory/factories/datasets"
+}

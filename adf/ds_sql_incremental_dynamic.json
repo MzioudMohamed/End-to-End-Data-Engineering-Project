@@ -1,0 +1,58 @@
+﻿{
+  "etag": "82013275-0000-0e00-0000-6aefaaca0000",
+  "id": "/subscriptions/b9f829da-f7c3-429e-a5e8-d3e793158c63/resourceGroups/rg-retailmod-dev/providers/Microsoft.DataFactory/factories/adf-retailmod-dev-mm10/datasets/ds_sql_incremental_dynamic",
+  "name": "ds_sql_incremental_dynamic",
+  "properties": {
+    "additionalProperties": null,
+    "annotations": [],
+    "description": null,
+    "folder": null,
+    "linkedServiceName": {
+      "parameters": null,
+      "referenceName": "ls_sql_legacy_retail",
+      "type": "LinkedServiceReference"
+    },
+    "parameters": {
+      "schema_name": {
+        "defaultValue": null,
+        "type": "string"
+      },
+      "table_name": {
+        "defaultValue": null,
+        "type": "string"
+      }
+    },
+    "schema": [
+      {
+        "name": "CustomerID",
+        "precision": 10,
+        "type": "int"
+      },
+      {
+        "name": "CustomerName",
+        "type": "nvarchar"
+      },
+      {
+        "name": "CustomerType",
+        "type": "varchar"
+      },
+      {
+        "name": "TerritoryID",
+        "precision": 10,
+        "type": "int"
+      },
+      {
+        "name": "ModifiedDate",
+        "scale": 0,
+        "type": "datetime2"
+      }
+    ],
+    "schemaTypePropertiesSchema": null,
+    "structure": null,
+    "table": null,
+    "tableName": null,
+    "type": "SqlServerTable"
+  },
+  "resourceGroup": "rg-retailmod-dev",
+  "type": "Microsoft.DataFactory/factories/datasets"
+}

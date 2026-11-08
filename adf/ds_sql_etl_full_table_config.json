@@ -1,0 +1,47 @@
+﻿{
+  "etag": "7f019bc7-0000-0e00-0000-6aefa4f10000",
+  "id": "/subscriptions/b9f829da-f7c3-429e-a5e8-d3e793158c63/resourceGroups/rg-retailmod-dev/providers/Microsoft.DataFactory/factories/adf-retailmod-dev-mm10/datasets/ds_sql_etl_full_table_config",
+  "name": "ds_sql_etl_full_table_config",
+  "properties": {
+    "additionalProperties": null,
+    "annotations": [],
+    "description": null,
+    "folder": null,
+    "linkedServiceName": {
+      "parameters": null,
+      "referenceName": "ls_sql_legacy_retail",
+      "type": "LinkedServiceReference"
+    },
+    "parameters": null,
+    "schema": [
+      {
+        "name": "ConfigId",
+        "precision": 10,
+        "type": "int"
+      },
+      {
+        "name": "SourceSchema",
+        "type": "nvarchar"
+      },
+      {
+        "name": "SourceTable",
+        "type": "nvarchar"
+      },
+      {
+        "name": "ExtractColumns",
+        "type": "nvarchar"
+      },
+      {
+        "name": "IsActive",
+        "type": "bit"
+      }
+    ],
+    "schemaTypePropertiesSchema": "dbo",
+    "structure": null,
+    "table": "EtlFullLoadConfig",
+    "tableName": null,
+    "type": "SqlServerTable"
+  },
+  "resourceGroup": "rg-retailmod-dev",
+  "type": "Microsoft.DataFactory/factories/datasets"
+}

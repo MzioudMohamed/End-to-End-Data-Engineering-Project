@@ -1,0 +1,45 @@
+﻿{
+  "etag": "8701ef46-0000-0e00-0000-6aefb5370000",
+  "id": "/subscriptions/b9f829da-f7c3-429e-a5e8-d3e793158c63/resourceGroups/rg-retailmod-dev/providers/Microsoft.DataFactory/factories/adf-retailmod-dev-mm10/datasets/ds_adls_incremental_parquet",
+  "name": "ds_adls_incremental_parquet",
+  "properties": {
+    "additionalProperties": null,
+    "annotations": [],
+    "compressionCodec": "snappy",
+    "description": null,
+    "folder": null,
+    "linkedServiceName": {
+      "parameters": null,
+      "referenceName": "ls_adls_landing",
+      "type": "LinkedServiceReference"
+    },
+    "location": {
+      "additionalProperties": null,
+      "fileName": {
+        "type": "Expression",
+        "value": "@concat(trim(dataset().table_name), '.parquet')"
+      },
+      "fileSystem": "landing",
+      "folderPath": {
+        "type": "Expression",
+        "value": "@concat(\n    'incremental/',\n    trim(dataset().table_name),\n    '/load_date=',\n    trim(dataset().load_date)\n)"
+      },
+      "type": "AzureBlobFSLocation"
+    },
+    "parameters": {
+      "load_date": {
+        "defaultValue": null,
+        "type": "string"
+      },
+      "table_name": {
+        "defaultValue": null,
+        "type": "string"
+      }
+    },
+    "schema": [],
+    "structure": null,
+    "type": "Parquet"
+  },
+  "resourceGroup": "rg-retailmod-dev",
+  "type": "Microsoft.DataFactory/factories/datasets"
+}
