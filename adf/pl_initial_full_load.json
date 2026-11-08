@@ -1,0 +1,199 @@
+﻿{
+  "activities": [
+    {
+      "additionalProperties": null,
+      "dataset": {
+        "parameters": {},
+        "referenceName": "ds_sql_etl_full_table_config",
+        "type": "DatasetReference"
+      },
+      "dependsOn": [],
+      "description": null,
+      "firstRowOnly": false,
+      "linkedServiceName": null,
+      "name": "lkp_full_load_config",
+      "onInactiveMarkAs": null,
+      "policy": {
+        "additionalProperties": null,
+        "retry": 0,
+        "retryIntervalInSeconds": 30,
+        "secureInput": false,
+        "secureOutput": false,
+        "timeout": "0.12:00:00"
+      },
+      "source": {
+        "additionalColumns": null,
+        "additionalProperties": null,
+        "disableMetricsCollection": null,
+        "isolationLevel": null,
+        "maxConcurrentConnections": null,
+        "partitionOption": "None",
+        "partitionSettings": null,
+        "produceAdditionalTypes": null,
+        "queryTimeout": "02:00:00",
+        "sourceRetryCount": null,
+        "sourceRetryWait": null,
+        "sqlReaderQuery": "SELECT\n    SourceSchema,\n    SourceTable,\n    ExtractColumns\nFROM dbo.EtlFullLoadConfig\nWHERE IsActive = 1;",
+        "sqlReaderStoredProcedureName": null,
+        "storedProcedureParameters": null,
+        "type": "SqlServerSource"
+      },
+      "state": null,
+      "type": "Lookup",
+      "userProperties": []
+    },
+    {
+      "activities": [
+        {
+          "additionalProperties": null,
+          "dataIntegrationUnits": null,
+          "dependsOn": [],
+          "description": null,
+          "enableSkipIncompatibleRow": null,
+          "enableStaging": false,
+          "inputs": [
+            {
+              "parameters": {
+                "schema_name": "@item().SourceSchema",
+                "table_name": {
+                  "type": "Expression",
+                  "value": "@item().SourceTable"
+                }
+              },
+              "referenceName": "ds_sql_full_dynamic",
+              "type": "DatasetReference"
+            }
+          ],
+          "linkedServiceName": null,
+          "logSettings": null,
+          "logStorageSettings": null,
+          "name": "cp_full_load_table",
+          "onInactiveMarkAs": null,
+          "outputs": [
+            {
+              "parameters": {
+                "load_date": "@pipeline().parameters.load_date",
+                "table_name": "@item().SourceTable"
+              },
+              "referenceName": "ds_adls_full_parquet",
+              "type": "DatasetReference"
+            }
+          ],
+          "parallelCopies": null,
+          "policy": {
+            "additionalProperties": null,
+            "retry": 0,
+            "retryIntervalInSeconds": 30,
+            "secureInput": false,
+            "secureOutput": false,
+            "timeout": "0.12:00:00"
+          },
+          "preserve": null,
+          "preserveRules": null,
+          "redirectIncompatibleRowSettings": null,
+          "sink": {
+            "additionalProperties": null,
+            "disableMetricsCollection": null,
+            "formatSettings": {
+              "additionalProperties": null,
+              "fileNamePrefix": null,
+              "maxRowsPerFile": null,
+              "type": "ParquetWriteSettings"
+            },
+            "maxConcurrentConnections": null,
+            "sinkRetryCount": null,
+            "sinkRetryWait": null,
+            "storeSettings": {
+              "additionalProperties": null,
+              "blockSizeInMb": null,
+              "copyBehavior": null,
+              "disableMetricsCollection": null,
+              "maxConcurrentConnections": null,
+              "metadata": null,
+              "type": "AzureBlobFSWriteSettings"
+            },
+            "type": "ParquetSink",
+            "writeBatchSize": null,
+            "writeBatchTimeout": null
+          },
+          "skipErrorFile": null,
+          "source": {
+            "additionalColumns": null,
+            "additionalProperties": null,
+            "disableMetricsCollection": null,
+            "isolationLevel": null,
+            "maxConcurrentConnections": null,
+            "partitionOption": "None",
+            "partitionSettings": null,
+            "produceAdditionalTypes": null,
+            "queryTimeout": "02:00:00",
+            "sourceRetryCount": null,
+            "sourceRetryWait": null,
+            "sqlReaderQuery": "@concat(\n'SELECT ',\nitem().ExtractColumns,\n' FROM [',\nitem().SourceSchema,\n'].[',\nitem().SourceTable,\n'] WHERE ModifiedDate < DATEADD(DAY, 1, ''',\npipeline().parameters.load_date,\n''')'\n)",
+            "sqlReaderStoredProcedureName": null,
+            "storedProcedureParameters": null,
+            "type": "SqlServerSource"
+          },
+          "stagingSettings": null,
+          "state": null,
+          "translator": {
+            "type": "TabularTranslator",
+            "typeConversion": true,
+            "typeConversionSettings": {
+              "allowDataTruncation": true,
+              "treatBooleanAsNumber": false
+            }
+          },
+          "type": "Copy",
+          "userProperties": [],
+          "validateDataConsistency": null
+        }
+      ],
+      "additionalProperties": null,
+      "batchCount": null,
+      "dependsOn": [
+        {
+          "activity": "lkp_full_load_config",
+          "additionalProperties": null,
+          "dependencyConditions": [
+            "Succeeded"
+          ]
+        }
+      ],
+      "description": null,
+      "isSequential": true,
+      "items": {
+        "type": "Expression",
+        "value": "@activity('lkp_full_load_config').output.value"
+      },
+      "name": "fe_full_load_tables",
+      "onInactiveMarkAs": null,
+      "state": null,
+      "type": "ForEach",
+      "userProperties": []
+    }
+  ],
+  "additionalProperties": null,
+  "annotations": [],
+  "concurrency": null,
+  "description": null,
+  "etag": "8101c494-0000-0e00-0000-6aefa8e70000",
+  "folder": null,
+  "id": "/subscriptions/b9f829da-f7c3-429e-a5e8-d3e793158c63/resourceGroups/rg-retailmod-dev/providers/Microsoft.DataFactory/factories/adf-retailmod-dev-mm10/pipelines/pl_initial_full_load",
+  "name": "pl_initial_full_load",
+  "parameters": {
+    "load_date": {
+      "defaultValue": "2014-04-30",
+      "type": "string"
+    }
+  },
+  "policy": {
+    "elapsedTimeMetric": {
+      "duration": null
+    }
+  },
+  "resourceGroup": "rg-retailmod-dev",
+  "runDimensions": null,
+  "type": "Microsoft.DataFactory/factories/pipelines",
+  "variables": null
+}

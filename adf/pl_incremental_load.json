@@ -4,10 +4,18 @@
       "additionalProperties": null,
       "dataset": {
         "parameters": {},
-        "referenceName": "ds_sql_etl_table_config",
+        "referenceName": "ds_sql_etl_incremental_table_config",
         "type": "DatasetReference"
       },
-      "dependsOn": [],
+      "dependsOn": [
+        {
+          "activity": "load_date",
+          "additionalProperties": null,
+          "dependencyConditions": [
+            "Succeeded"
+          ]
+        }
+      ],
       "description": null,
       "firstRowOnly": false,
       "linkedServiceName": null,
@@ -53,8 +61,17 @@
           "enableStaging": false,
           "inputs": [
             {
-              "parameters": {},
-              "referenceName": "ds_sql_salesorderheader",
+              "parameters": {
+                "schema_name": {
+                  "type": "Expression",
+                  "value": "@item().SourceSchema"
+                },
+                "table_name": {
+                  "type": "Expression",
+                  "value": "@item().SourceTable"
+                }
+              },
+              "referenceName": "ds_sql_incremental_dynamic",
               "type": "DatasetReference"
             }
           ],
@@ -66,7 +83,10 @@
           "outputs": [
             {
               "parameters": {
-                "load_date": "@pipeline().parameters.load_date",
+                "load_date": {
+                  "type": "Expression",
+                  "value": "@variables('current_load_date')"
+                },
                 "table_name": "@item().SourceTable"
               },
               "referenceName": "ds_adls_incremental_parquet",
@@ -125,7 +145,7 @@
             "sourceRetryWait": null,
             "sqlReaderQuery": {
               "type": "Expression",
-              "value": "@concat(\n'SELECT SalesOrderID, OrderDate, CustomerID, TerritoryID, OnlineOrderFlag, SubTotal, TaxAmt, Freight, ModifiedDate ',\n'FROM [', item().SourceSchema, '].[', item().SourceTable, '] ',\n'WHERE [', item().WatermarkColumn, '] >= ''', pipeline().parameters.load_date, ''' ',\n'AND [', item().WatermarkColumn, '] < DATEADD(DAY, 1, ''', pipeline().parameters.load_date, ''')'\n)"
+              "value": "@concat(\n'SELECT ', item().ExtractColumns, ' ',\n'FROM [', item().SourceSchema, '].[', item().SourceTable, '] ',\n'WHERE [', item().WatermarkColumn, '] >= ''',\nvariables('current_load_date'), ''' ',\n'AND [', item().WatermarkColumn, '] < DATEADD(DAY, 1, ''',\nvariables('current_load_date'), ''')'\n)"
             },
             "sqlReaderStoredProcedureName": null,
             "storedProcedureParameters": null,
@@ -168,22 +188,84 @@
       "state": null,
       "type": "ForEach",
       "userProperties": []
+    },
+    {
+      "additionalProperties": null,
+      "dataset": {
+        "parameters": {},
+        "referenceName": "ds_sql_simulation",
+        "type": "DatasetReference"
+      },
+      "dependsOn": [],
+      "description": null,
+      "firstRowOnly": null,
+      "linkedServiceName": null,
+      "name": "lkp_simulation_state",
+      "onInactiveMarkAs": null,
+      "policy": {
+        "additionalProperties": null,
+        "retry": 0,
+        "retryIntervalInSeconds": 30,
+        "secureInput": false,
+        "secureOutput": false,
+        "timeout": "0.12:00:00"
+      },
+      "source": {
+        "additionalColumns": null,
+        "additionalProperties": null,
+        "disableMetricsCollection": null,
+        "isolationLevel": null,
+        "maxConcurrentConnections": null,
+        "partitionOption": "None",
+        "partitionSettings": null,
+        "produceAdditionalTypes": null,
+        "queryTimeout": "02:00:00",
+        "sourceRetryCount": null,
+        "sourceRetryWait": null,
+        "sqlReaderQuery": "SELECT CONVERT(varchar(10), LastDay, 23) AS load_date\nFROM dbo.SimulationState\nWHERE Id = 1;",
+        "sqlReaderStoredProcedureName": null,
+        "storedProcedureParameters": null,
+        "type": "SqlServerSource"
+      },
+      "state": null,
+      "type": "Lookup",
+      "userProperties": []
+    },
+    {
+      "additionalProperties": null,
+      "dependsOn": [
+        {
+          "activity": "lkp_simulation_state",
+          "additionalProperties": null,
+          "dependencyConditions": [
+            "Succeeded"
+          ]
+        }
+      ],
+      "description": null,
+      "name": "load_date",
+      "onInactiveMarkAs": null,
+      "policy": {
+        "secureInput": false,
+        "secureOutput": false
+      },
+      "setSystemVariable": null,
+      "state": null,
+      "type": "SetVariable",
+      "userProperties": [],
+      "value": "@activity('lkp_simulation_state').output.firstRow.load_date",
+      "variableName": "current_load_date"
     }
   ],
   "additionalProperties": null,
   "annotations": [],
   "concurrency": null,
   "description": null,
-  "etag": "c106532c-0000-0e00-0000-6ae600890000",
+  "etag": "a40176ad-0000-0e00-0000-6aeff43d0000",
   "folder": null,
-  "id": "/subscriptions/b9f829da-f7c3-429e-a5e8-d3e793158c63/resourceGroups/rg-retailmod-dev/providers/Microsoft.DataFactory/factories/adf-retailmod-dev-mm10/pipelines/pl_incremental_generic",
-  "name": "pl_incremental_generic",
-  "parameters": {
-    "load_date": {
-      "defaultValue": "2014-05-01",
-      "type": "string"
-    }
-  },
+  "id": "/subscriptions/b9f829da-f7c3-429e-a5e8-d3e793158c63/resourceGroups/rg-retailmod-dev/providers/Microsoft.DataFactory/factories/adf-retailmod-dev-mm10/pipelines/pl_incremental_load",
+  "name": "pl_incremental_load",
+  "parameters": null,
   "policy": {
     "elapsedTimeMetric": {
       "duration": null
@@ -192,5 +274,10 @@
   "resourceGroup": "rg-retailmod-dev",
   "runDimensions": null,
   "type": "Microsoft.DataFactory/factories/pipelines",
-  "variables": null
+  "variables": {
+    "current_load_date": {
+      "defaultValue": null,
+      "type": "String"
+    }
+  }
 }
